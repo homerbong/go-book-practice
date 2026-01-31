@@ -9,3 +9,11 @@ vet: fmt
 
 build: vet
 	go build
+
+# As part of exercise 2
+clean:
+	go clean
+
+# Expanding on exercise 2
+run: build
+	./hello_world
