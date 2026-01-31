@@ -1,3 +1,4 @@
 # go-book-practice
 The repo used for learning go
-I will add more sections as I advance through the book
+
+The base for all code written here is Jon Bodner's book *Learning Go: An Idiomatic Approach to Real-World Go Programming*.
