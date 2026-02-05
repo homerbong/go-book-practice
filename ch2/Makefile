@@ -16,4 +16,4 @@ clean:
 
 # Expanding on exercise 2
 run: build
-	./hello-world
+	./predeclared-types
