@@ -11,6 +11,9 @@
 hello-world
 predeclared-types
 
+# Pdf files
+*.pdf
+
 # Test binary, built with `go test -c`
 *.test
 
