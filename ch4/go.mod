@@ -1,6 +1,6 @@
-module chapter_3
+module chapter-4
 
-require  go-book-practice/display v0.0.0
+require go-book-practice/display v0.0.0
 
 replace go-book-practice/display => ../display
 

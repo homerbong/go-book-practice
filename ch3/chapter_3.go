@@ -2,17 +2,11 @@ package main
 
 import (
 	"fmt"
+	"go-book-practice/display"
+	"maps"
 	"reflect"
 	"slices"
 )
-
-func printSection(sectionTitle string) {
-	fmt.Println()
-	fmt.Println("#################################################")
-	fmt.Println("#", sectionTitle)
-	fmt.Println("#################################################")
-	fmt.Println()
-}
 
 func customSliceCompare(a int, b string) bool {
 	switch a {
@@ -55,9 +49,75 @@ func example38() {
 	fmt.Println("z:", z)         // z = [c d y]
 }
 
+func example310() {
+	totalWins := map[string]int{}
+	totalWins["Orcas"] = 1
+	totalWins["Lions"] = 2
+	fmt.Println("Wins Orcas:", totalWins["Orcas"])
+	fmt.Println("Wins Kittens:", totalWins["Kittens"])
+	totalWins["Kittens"]++ // This works because it returns default value which is 0.
+	fmt.Println("Wins Kittens after increasing:", totalWins["Kittens"])
+	totalWins["Lions"] = 3
+	fmt.Println("Wins Lions:", totalWins["Lions"])
+	// totalWins["Others"] := 3 // vet error: non-name totalWins["Others"] on left side of :=
+}
+
+func exercise31() {
+	display.SectionTitle("Exercise 1")
+
+	greetings := []string{"Hello", "Hola", "नमस्कार", "こんにちは", "Привіт"}
+	firstSubslice := greetings[:2:2]
+	secondSubslice := greetings[1:4:4]
+	thirdSubslice := greetings[3:]
+	fmt.Println("greetings: ", greetings, len(greetings), cap(greetings))
+	fmt.Println("firstSubslice: ", firstSubslice, len(firstSubslice), cap(firstSubslice))
+	fmt.Println("secondSubslice: ", secondSubslice, len(secondSubslice), cap(secondSubslice))
+	fmt.Println("thirdSubslice: ", thirdSubslice, len(thirdSubslice), cap(thirdSubslice))
+}
+
+func exercise32() {
+	display.SectionTitle("Exercise 2")
+
+	message := "Hi 👩 and 👨"
+	fourthRune := []rune(message)[3]
+	fmt.Println("fourthRune:", string(fourthRune))
+
+}
+
+func exercise33() {
+	display.SectionTitle("Exercise 3")
+
+	type Employee struct {
+		firstName string
+		lastName  string
+		id        int
+	}
+
+	firstEmployee := Employee{
+		"First",
+		"Employee",
+		1,
+	}
+
+	secondEmployee := Employee{
+		lastName:  "Employee",
+		firstName: "Second",
+		id:        2,
+	}
+
+	var thirdEmployee Employee
+	thirdEmployee.firstName = "Third"
+	thirdEmployee.lastName = "Employee"
+	thirdEmployee.id = 3
+
+	fmt.Println("First: ", firstEmployee)
+	fmt.Println("First: ", secondEmployee)
+	fmt.Println("First: ", thirdEmployee)
+}
+
 func main() {
 	// Arrays
-	printSection("Arrays")
+	display.SectionTitle("Arrays")
 
 	var arrayVar [3]int
 	var arrayLiteralVar = [3]int{1, 2, 3}
@@ -100,7 +160,7 @@ func main() {
 	// var outOfBoundsRead = arrayLiteralVar[length] // Causes panic
 	// fmt.Println(outOfBoundsRead)
 
-	printSection("Slices")
+	display.SectionTitle("Slices")
 
 	var sliceVar = []int{10, 20, 30}
 	var sliceSparse = []int{1, 2, 5: 4, 6, 10: 20, 15: 30} // Fills in the indexes not specified with default value, i.e. 0 in this case.
@@ -357,6 +417,200 @@ func main() {
 	var runeSlice []rune = []rune(multiByteStr)
 	fmt.Println("byteSlice:", byteSlice)
 	fmt.Println("runeSlice:", runeSlice) // uncommon
+	fmt.Println()
 
 	// Maps
+	display.SectionTitle("Maps")
+	var nilMap map[string]int
+	if nilMap == nil {
+		fmt.Println("Map is initialized as nil")
+		fmt.Println("len(nilMap):", len(nilMap)) // still has length of 0
+	}
+
+	fmt.Println("Reading a nil map is fine and returns a default value: ", nilMap["a"])
+	// nilMap["a"] = 1 // Cause panic: assignment to entry in nil map
+	totalWins := map[string]int{}
+	if !(totalWins == nil) {
+		fmt.Println("totalWins is not nil. It has length: ", len(totalWins))
+	}
+	totalWins["Alex"] = 2 // you can write
+	fmt.Println("totalWins after write:", totalWins)
+
+	teams := map[string][]string{
+		"Orcas":   []string{"Fred", "Ralph", "Bijou"},
+		"Lions":   []string{"Sarah", "Peter", "Billie"},
+		"Kittens": []string{"Waldo", "Raul", "Ze"},
+	}
+	fmt.Println("teams:", teams)
+
+	ages := make(map[int][]string, 10)
+	fmt.Println("ages, len(ages): ", ages, len(ages)) // Use make to set the initial size. Maps can grow but if you know the size setting it from the beginning is more performant
+	fmt.Println()
+
+	example310()
+	fmt.Println()
+
+	m := map[string]int{
+		"hello":   5,
+		"world":   0,
+		"another": 1,
+	}
+
+	v, ok := m["hello"]
+	fmt.Println("Value, has value \"hello\":", v, ok)
+
+	v, ok = m["world"]
+	fmt.Println("Value, has value \"world\":", v, ok)
+
+	v, ok = m["something"]
+	fmt.Println("Value, has value \"something\":", v, ok)
+	fmt.Println()
+
+	fmt.Println("Before delete: ", m)
+	delete(m, "hello")
+	delete(m, "something") // Nothing happens
+	fmt.Println("After delete: ", m)
+	clear(m)
+	fmt.Println("After clear:", m)
+	fmt.Println()
+
+	m1 := map[string]int{
+		"a": 1,
+		"b": 2,
+	}
+
+	m2 := map[string]int{
+		"a": 1,
+		"b": 2,
+	}
+
+	m3 := map[string]int{
+		"a": 1,
+	}
+
+	m4 := map[string]int{
+		"a": 10,
+		"b": 2,
+	}
+
+	if maps.Equal(m1, m2) {
+		fmt.Println("m1 and m2 have the same key-value pairs", m1, m2)
+	}
+
+	if maps.EqualFunc(m1, m4, func(v1 int, v2 int) bool {
+		return v1 == v2 || v1*10 == v2
+	}) {
+		fmt.Println("Custom comparison makes m1 and m4 equal", m1, m4)
+	}
+
+	if !maps.Equal(m1, m3) && !maps.Equal(m1, m4) {
+		fmt.Println("m1 is different from m3 (smaller size) and m4 (different values)", m1, m3, m4)
+	}
+	fmt.Println()
+
+	// Using maps as sets
+	intSlice := []int{1, 2, 3, 4, 3, 1, 5, 7}
+	intSet := map[int]bool{}
+	intSetWithStruct := map[int]struct{}{} // advantage that it ocuppies less memory. Use only for very large sets
+	for _, v := range intSlice {
+		intSet[v] = true
+		intSetWithStruct[v] = struct{}{}
+	}
+	if intSet[5] {
+		fmt.Println("5 is in the set of integers with booleans")
+	}
+	if _, ok := intSetWithStruct[5]; ok { // Disadvantage that ineeds to check ok and not the value itself.
+		fmt.Println("5 is in the set of integers with struct")
+	}
+	fmt.Println("Slice length and set map length:", len(intSlice), len(intSet))
+
+	display.SectionTitle("Structs")
+	type hasNameFunc func() bool
+	type person struct {
+		name   string
+		age    int
+		pet    string
+		hasPet hasNameFunc
+	}
+	var fred person                     // initialized with all default values
+	bob := person{}                     // also initialized with all default values
+	fmt.Println("fred, bob", fred, bob) // properties are initialized to default values so strings are not displayed very well on terminal.
+	fmt.Println("fred, fred's name, fred's age, bob, bob's hasName:", fred, fred.name, fred.age, bob, bob.hasPet)
+	// bob.hasName() // Can't call a nil function
+
+	julia := person{ // All properties are required
+		"Julia", // Another issue is that this will break if the struct will be adding new properties.
+		30,
+		"cat",
+		func() bool { return true },
+	}
+	beth := person{ // Not all properties are required.
+		name: "Beth",
+		age:  31,
+	}
+	fmt.Println("Julia, Beth:", julia, beth)
+	fmt.Println("Julia has a pet: ", julia.hasPet())
+	fmt.Println("Julia's pet is: ", julia.pet)
+	beth.hasPet = func() bool { return false }
+	fmt.Println("Beth has a pet: ", beth.hasPet())
+
+	// Anonymous structs
+	// They are used when translating external data to a struct (unmarshalling/marshalling data such as JSON or Protocol Buffers)
+	pet := struct {
+		name string
+		kind string
+	}{
+		name: "Fido",
+		kind: "Dog",
+	}
+	fmt.Println("Anonymous struct:", pet)
+	fmt.Println("Pet's name:", pet.name)
+	fmt.Println("Pet's kind:", pet.kind)
+	fmt.Println()
+
+	// Comparing structs
+	type firstPerson struct {
+		name string
+		age  int
+	}
+	type secondPerson struct {
+		name string
+		age  int
+	}
+	type thirdPerson struct { // Not convertable to first person because of different order.
+		age  int
+		name string
+	}
+	type fourthPerson struct { // different properties
+		firstName string
+		age       int
+	}
+	type fifthPerson struct { // Has an additional field
+		name          string
+		age           int
+		favoriteColor string
+	}
+	firstStruct := firstPerson{}
+	secondStruct := secondPerson{}
+	thirdStruct := thirdPerson{}
+	fourthStruct := fourthPerson{}
+	fifthStruct := fifthPerson{}
+	fmt.Println("First two structs are comparable if casted: ", firstStruct == firstPerson(secondStruct))
+	fmt.Println("All structs: ", firstStruct, secondStruct, thirdStruct, fourthStruct, fifthStruct)
+	// fmt.Println("Not comparable: ", firstStruct == firstPerson(thirdStruct)) // ver error: cannot convert thirdStruct (variable of struct type thirdPerson) to type firstPerson
+	// fmt.Println("Not comparable: ", firstStruct == firstPerson(fourthStruct)) // ver error: cannot convert fourthtruct (variable of struct type fourthPerson) to type firstPerson
+	// fmt.Println("Not comparable: ", firstStruct == firstPerson(fifthStruct)) // ver error: cannot convert fifthStruct (variable of struct type fifthPerson) to type firstPerson
+	// fmt.Println("Not comparable: ", fifthPerson(firstStruct) == fifthStruct) // ver error: cannot convert firstStruct (variable of struct type firstPerson) to type fifthPerson
+	firstAnonynomousStruct := struct {
+		name string
+		age  int
+	}{}
+	firstAnonynomousStruct = firstStruct
+	if firstStruct == firstAnonynomousStruct {
+		fmt.Println("firstStruct and firstAnonymousStruct are equal: ", firstStruct, firstAnonynomousStruct)
+	}
+
+	exercise31()
+	exercise32()
+	exercise33()
 }
