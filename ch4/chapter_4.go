@@ -430,6 +430,40 @@ done:
 	fmt.Println("A very useful example on where goto is useful can be found in the floatBits method in the file atof.go in the strconv package")
 }
 
+func exercise1() []int {
+	randNums := make([]int, 0, 100)
+	for range 100 {
+		randNums = append(randNums, rand.Intn(101))
+	}
+	fmt.Println("randNums: ", len(randNums), cap(randNums))
+	fmt.Println(randNums)
+	return randNums
+}
+
+func exercise2(nums []int) {
+	for _, val := range nums {
+		switch {
+		case val%2 == 0 && val%3 == 0:
+			fmt.Println("Six!")
+		case val%2 == 0:
+			fmt.Println("Two!")
+		case val%3 == 0:
+			fmt.Println("Three!")
+		default:
+			fmt.Println("Never mind")
+		}
+	}
+}
+
+func exercise3() {
+	var total int
+	for i := range 10 {
+		total := total + i // Shadowing
+		fmt.Println("total in loop:", total)
+	}
+	fmt.Println("total outside:", total) // 0 as it was shadowed by the for block declared variable.
+}
+
 func main() {
 	display.SectionTitle("Chapter 4")
 	fmt.Println("hello")
@@ -470,4 +504,13 @@ func main() {
 
 	display.SectionTitle("goto Statement")
 	gotoStatementExamples()
+
+	display.SectionTitle("Exercise 1")
+	randNums := exercise1()
+
+	display.SectionTitle("Exercise 2")
+	exercise2(randNums)
+
+	display.SectionTitle("Exercise 3")
+	exercise3()
 }
