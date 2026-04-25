@@ -293,6 +293,102 @@ func compareForLoops() {
 	}
 }
 
+func switchStatementExamples() {
+	words := []string{"a", "cow", "smile", "gopher", "octopus", "anthropologist"}
+	for _, word := range words {
+		switch size := len(word); size { // statement scoped variable
+		case 1, 2:
+			fallthrough // It allows for this kind of logic but you should reconsider using it.
+		case 3, 4:
+			fmt.Println(word, "is a short word")
+			if word != "cow" { // Mulitple lines under the same case without braces
+				break // It allows for the break statement but it might indicate you're doing something too complicated.
+			}
+			fmt.Println("Muuuuuuuu")
+		case 5:
+			wordLen := len(word)                                       // Case scoped variable
+			fmt.Println(word, "is exactly the right length:", wordLen) // No break statement
+		case 6, 7, 8, 9: // Nothing happens for these cases
+		default:
+			fmt.Println(word, "is a long word!")
+		}
+	}
+	fmt.Println()
+
+loop:
+	for i := 0; i < 10; i += 1 {
+		switch i {
+		case 0, 2, 4, 6:
+			fmt.Println(i, "is even")
+		case 3:
+			fmt.Println(i, "is divisible by 3 but not by 2")
+		case 7:
+			fmt.Println("Exit the loop") // 7, 8 and 9 won't be printed.
+			break loop
+		default:
+			fmt.Println(i, "is boring")
+		}
+	}
+	fmt.Println()
+
+	// blank switch
+	otherWords := []string{"hi", "salutations", "hello"}
+	for _, word := range otherWords {
+		switch wordLen := len(word); {
+		case wordLen < 5:
+			fmt.Println(word, "is a short word")
+		case wordLen > 10:
+			fmt.Println(word, "is a long word!")
+		default:
+			fmt.Println(word, "is exactly the right length:", wordLen)
+
+		}
+	}
+
+	// regular switch vs blank switch
+	// if you find yourself comparing the same variable in the case statements such as below
+	a := 1
+	switch {
+	case a == 1:
+		fmt.Println("a is 1")
+	case a == 2:
+		fmt.Println("a is 2")
+	case a == 3:
+		fmt.Println("a is 3")
+	default:
+		fmt.Println("a is", a)
+	}
+	fmt.Println()
+	// You should probably rewrite this as
+	switch a {
+	case 1:
+		fmt.Println("a is 1")
+	case 2:
+		fmt.Println("a is 2")
+	case 3:
+		fmt.Println("a is 3")
+	default:
+		fmt.Println("a is", a)
+	}
+	fmt.Println()
+
+	// Choosing between if and switch
+	// A switch statement indicates there is a relationship between the values and comparisons in each case
+	// FizzBuzz example
+	for i := 1; i < 31; i++ {
+		switch {
+		case i%3 == 0 && i%5 == 0:
+			fmt.Println("FizzBuzz")
+		case i%3 == 0:
+			fmt.Println("Fizz")
+		case i%5 == 0:
+			fmt.Println("Buzz")
+		default:
+			fmt.Println(i) // No need for continue statements and default behaviour is explicit.
+		}
+	}
+}
+
 func main() {
 	display.SectionTitle("Chapter 4")
 	fmt.Println("hello")
@@ -318,14 +414,16 @@ func main() {
 
 	universeBlockShadowing()
 
-	display.SectionTitle("If block")
+	display.SectionTitle("if Statement")
 	ifBlockExamples()
 
-	display.SectionTitle("for block")
+	display.SectionTitle("for Statement")
 	forBlockExamples()
 	// Use for range statement with built-in compound types as it makes thigs easier
 	// Use complete for statement when iterating over a subset of a compound type. (slices could also work?)
 	// Condition only is a good replacement for the while loop
 	// infinite for loop might be usefule in very rare cases and it should have a break or return statement. Also useful for the iterator pattern.
 
+	display.SectionTitle("switch Statement")
+	switchStatementExamples()
 }
