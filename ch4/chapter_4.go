@@ -389,6 +389,47 @@ loop:
 	}
 }
 
+/*
+Not recommended to use unless there are particular scenarios that require it.
+There are limitations to help avoiding misuse.
+*/
+func gotoStatementExamples() {
+	a := 10
+	// goto skip // vet error: goto skip jumps over variable declaration at line 399
+	b := 20
+
+	// skip:
+	c := 30
+	fmt.Println(a, b, c)
+	if c > a {
+		fmt.Println("c is greater than a")
+		// goto inner // compiler error:  goto inner jumps into block starting at ./chapter_4.go:408:11
+	}
+	if a < b {
+		// inner:
+		fmt.Println("a is less than b")
+	}
+	fmt.Println()
+
+	// Legal use of the goto statement
+	a = rand.Intn(10)
+	for a < 100 {
+		if a%5 == 0 {
+			goto done // This could be done with a boolean flag or duplicate the code after.
+			// boolean is the same as goto but more verbose.
+			// Duplicating code makes it harder to maintain
+		}
+		a = a*2 + 1
+	}
+	fmt.Println("Do something if the for loop completes.")
+done:
+	fmt.Println("Do complicated stuff no matter why we left the loop")
+	fmt.Println("Done: ", a)
+
+	fmt.Println()
+	fmt.Println("A very useful example on where goto is useful can be found in the floatBits method in the file atof.go in the strconv package")
+}
+
 func main() {
 	display.SectionTitle("Chapter 4")
 	fmt.Println("hello")
@@ -426,4 +467,7 @@ func main() {
 
 	display.SectionTitle("switch Statement")
 	switchStatementExamples()
+
+	display.SectionTitle("goto Statement")
+	gotoStatementExamples()
 }
