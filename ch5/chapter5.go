@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go-book-practice/display"
+	"strconv"
 )
 
 type MyFuncParams struct {
@@ -79,6 +80,57 @@ func f2(a string) int {
 	return total
 }
 
+func calculatorExample() {
+	add := func(i, j int) int { return i + j }
+	sub := func(i, j int) int { return i - j }
+	mul := func(i, j int) int { return i * j }
+	div := func(i, j int) int { return i / j }
+	var opMap = map[string]func(int, int) int{
+		"+": add,
+		"-": sub,
+		"*": mul,
+		"/": div,
+	}
+
+	var expressions = [][]string{
+		{"2", "+", "3"},
+		{"2", "-", "3"},
+		{"2", "*", "3"},
+		{"2", "/", "3"},
+		{"2", "%", "3"},
+		{"two", "+", "three"},
+		{"5"},
+	}
+
+	for _, val := range expressions {
+		if len(val) != 3 {
+			fmt.Println("Invalid expression:", val)
+			continue
+		}
+
+		p1, err := strconv.Atoi(val[0])
+		if err != nil {
+			fmt.Println("Error parsing first operand:", err)
+			continue
+		}
+
+		opFunc, ok := opMap[val[1]]
+		if !ok {
+			fmt.Println("Invalid operator:", val[1])
+			continue
+		}
+
+		p2, err := strconv.Atoi(val[2])
+		if err != nil {
+			fmt.Println("Error parsing second operand", err)
+			continue
+		}
+
+		result := opFunc(p1, p2)
+		fmt.Println(val, "=", result)
+	}
+}
+
 func functionsExamples() {
 	result := div(5, 2)
 	fmt.Println("result:", result)
@@ -120,6 +172,7 @@ func functionsExamples() {
 	fmt.Println("Calling myFuncVar(\"Hello`\"): ", myFuncVar("Hello"))
 	myFuncVar = f2
 	fmt.Println("Calling myFuncVar(\"Hello`\"): ", myFuncVar("Hello"))
+	calculatorExample()
 }
 
 func main() {
