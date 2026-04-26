@@ -187,6 +187,27 @@ func anonyousFunctionsExample() {
 	fmt.Println("new      -> 4 / 2 =", result)
 }
 
+func closuresExamples() {
+	a := 20
+	f := func() {
+		fmt.Println("inside f  -> a =", a)
+		a += 10
+	}
+	f()
+	fmt.Println("outside f -> a =", a)
+	f()
+	fmt.Println("outside f -> a =", a)
+	fmt.Println()
+
+	// You can shadow a variable in the closure
+	f2 := func() {
+		a := 100
+		fmt.Println("inside f2  -> a =", a)
+	}
+	f2()
+	fmt.Println("outside f2 -> a =", a)
+}
+
 func functionsExamples() {
 	result := div(5, 2)
 	fmt.Println("result:", result)
@@ -233,6 +254,10 @@ func functionsExamples() {
 	display.SectionTitle("Anonymous functions")
 	anonyousFunctionsExample()
 	fmt.Println("add after being modified by other function -> 2 + 3 = ", add(2, 3))
+
+	display.SectionTitle("Closures")
+	closuresExamples()
+
 }
 
 func main() {
