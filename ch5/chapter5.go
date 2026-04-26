@@ -13,6 +13,20 @@ type MyFuncParams struct {
 	Age       int
 }
 
+/*
+Type for operator functions
+*/
+type opFuncType func(int, int) int
+
+// Use with very much care. You shouldn't do this unless you really need this capability.
+// Package level state should be immutable to make data flow easier to understand.
+var (
+	add = func(i, j int) int { return i + j }
+	sub = func(i, j int) int { return i - j }
+	mul = func(i, j int) int { return i * j }
+	// div = func(i, j int) int { return i / j }
+)
+
 func div(num, denom int) int { // You can use only one type at the end if all params are of the same type.
 	if denom == 0 {
 		return 0
@@ -85,7 +99,7 @@ func calculatorExample() {
 	sub := func(i, j int) int { return i - j }
 	mul := func(i, j int) int { return i * j }
 	div := func(i, j int) int { return i / j }
-	var opMap = map[string]func(int, int) int{
+	var opMap = map[string]opFuncType{
 		"+": add,
 		"-": sub,
 		"*": mul,
@@ -131,6 +145,48 @@ func calculatorExample() {
 	}
 }
 
+func anonyousFunctionsExample() {
+	// Declared anonymous function
+	f := func(j int) {
+		fmt.Println("Printing", j, "from an anonymous function")
+	}
+
+	for i := range 5 {
+		f(i)
+	}
+	fmt.Println()
+
+	for i := range 5 {
+		// Immediately called function: not really useful unless you're using the defer statement or launching goroutines
+		func(j int) {
+			fmt.Println("Printing", j, "from an anonymous function")
+		}(i)
+	}
+	fmt.Println()
+
+	result := add(1, 5)
+	fmt.Println("original -> 1 + 5 =", result)
+	// You can reassing an anonymous function declared as package varriable.
+	add = func(i, j int) int {
+		return i + j + j
+	}
+	result = add(1, 5)
+	fmt.Println("new      -> 1 + 5 =", result)
+	fmt.Println()
+
+	result = div(4, 2)
+	fmt.Println("original -> 4 / 2 =", result)
+	// You can shadow a package function but you can't reassign it!
+	// div = func(i, j int) int { // compiler error: cannot assign to div (neither addressable nor a map index expression
+	// 	return i / (2 * j)
+	// }
+	div := func(i, j int) int { // Changes how div works but it only does for this scope.
+		return i / (2 * j)
+	}
+	result = div(4, 2)
+	fmt.Println("new      -> 4 / 2 =", result)
+}
+
 func functionsExamples() {
 	result := div(5, 2)
 	fmt.Println("result:", result)
@@ -173,6 +229,10 @@ func functionsExamples() {
 	myFuncVar = f2
 	fmt.Println("Calling myFuncVar(\"Hello`\"): ", myFuncVar("Hello"))
 	calculatorExample()
+
+	display.SectionTitle("Anonymous functions")
+	anonyousFunctionsExample()
+	fmt.Println("add after being modified by other function -> 2 + 3 = ", add(2, 3))
 }
 
 func main() {
