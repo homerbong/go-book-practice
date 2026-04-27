@@ -4,6 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"go-book-practice/display"
+	"io"
+	"log"
+	"os"
 	"sort"
 	"strconv"
 )
@@ -260,6 +263,35 @@ func closuresExamples() {
 	}
 }
 
+func cat() {
+	if len(os.Args) < 2 {
+		log.Fatal("no file specified")
+	}
+
+	f, err := os.Open(os.Args[1])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	data := make([]byte, 2048)
+	for {
+		count, err := f.Read(data)
+		os.Stdout.Write(data[:count])
+		if err != nil {
+			if err != io.EOF {
+				log.Fatal(err)
+			}
+			break
+		}
+	}
+}
+
+func deferExamples() {
+	cat()
+}
+
 func functionsExamples() {
 	result := div(5, 2)
 	fmt.Println("result:", result)
@@ -311,7 +343,7 @@ func functionsExamples() {
 	closuresExamples()
 
 	display.SectionTitle("defer")
-
+	deferExamples()
 }
 
 func main() {
