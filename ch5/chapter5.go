@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go-book-practice/display"
+	"sort"
 	"strconv"
 )
 
@@ -187,6 +188,12 @@ func anonyousFunctionsExample() {
 	fmt.Println("new      -> 4 / 2 =", result)
 }
 
+func makeMult(base int) func(int) int {
+	return func(val int) int {
+		return base * val
+	}
+}
+
 func closuresExamples() {
 	a := 20
 	f := func() {
@@ -206,6 +213,51 @@ func closuresExamples() {
 	}
 	f2()
 	fmt.Println("outside f2 -> a =", a)
+	fmt.Println()
+
+	// Why closures?
+	// It is useful to limit a function's scope: you use it multiple times here but not in other places.
+	// Also useful when you need to work on a variable declared in the same function and access from your closures.
+	// Also useful when you return a function from another function as it allows modifying the variables of the containing function.
+
+	// Passing functions as parameters:
+	type Person struct {
+		FirstName string
+		LastName  string
+		Age       int
+	}
+	people := []Person{
+		{"Pat", "Patterson", 37},
+		{"Tracy", "Bobdaughter", 23},
+		{"Fred", "Fredson", 18},
+	}
+	fmt.Println("people before sorting:            ", people)
+
+	sort.Slice(people, func(i, j int) bool {
+		return people[i].LastName < people[j].LastName
+	})
+	fmt.Println("people after sorting by last name:", people)
+
+	sort.Slice(people, func(i, j int) bool {
+		return people[i].Age < people[j].Age
+	})
+	fmt.Println("people after sorting by age      :", people)
+	fmt.Println()
+
+	// Just to understand the algorithm behind sort.
+	numbers := []int{4, 6, 5, 2, 7}
+	sort.Slice(numbers, func(i, j int) bool {
+		fmt.Println(i, j)
+		return numbers[i] < numbers[j]
+	})
+	fmt.Println()
+	// Returning functions
+
+	twoBase := makeMult(2)
+	threeBase := makeMult(3)
+	for i := range 3 {
+		fmt.Println(twoBase(i), threeBase(i))
+	}
 }
 
 func functionsExamples() {
@@ -257,6 +309,8 @@ func functionsExamples() {
 
 	display.SectionTitle("Closures")
 	closuresExamples()
+
+	display.SectionTitle("defer")
 
 }
 
