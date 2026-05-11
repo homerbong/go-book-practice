@@ -107,11 +107,55 @@ func pointerTypeExamples() {
 	fmt.Println("p:", p)
 }
 
+func failedUpdate(g *int) {
+	fmt.Println("g inside before reassinging:", g)
+	// The function receives a copy of the pointer so if it's a nil it won't be updated.
+	x := 10
+	g = &x
+	fmt.Println("g inside failedUpdate:", g)
+}
+
+func update(px *int) {
+	*px = 55
+}
+
+func reassingingPointersExamples() {
+	var x int = 10
+	var y int = x
+	y = 20
+	fmt.Println("x y:", x, y)
+	fmt.Println()
+
+	var f *int // nil pointers can't be updated
+	fmt.Println("f before failedUpdate:", f)
+	failedUpdate(f)
+	fmt.Println("f after failedUpdate:", f)
+	fmt.Println()
+
+	val := 5
+	f = &val
+	fmt.Println("f before failedUpdate:", f)
+	fmt.Println("*f before failedUpdate:", *f)
+	fmt.Println()
+	failedUpdate(f)
+	fmt.Println()                             // This changes the value of the pointer of the internal variable.
+	fmt.Println("f after failedUpdate:", f)   // It does not change the pointer itself.
+	fmt.Println("*f after failedUpdate:", *f) // It does not change the value to which the pointer points to.
+	fmt.Println()
+	update(f)                           // This one instead changes the value to which the pointer points to
+	fmt.Println("f after Update:", f)   // The pointer itself does not changes since it's copied.
+	fmt.Println("*f after Update:", *f) // The value does change here
+}
+
 func pointersExamples() {
 	pointerSyntaxExamples()
 	fmt.Println()
 
 	pointerTypeExamples()
+	fmt.Println()
+
+	reassingingPointersExamples()
+	fmt.Println()
 }
 
 func main() {
