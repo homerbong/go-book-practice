@@ -1,13 +1,21 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"go-book-practice/display"
+	"time"
 )
 
 type Foo struct {
 	foo string
 	bar int
+}
+
+type FooJson struct {
+	Foo string `json:"foo"` // Capital property name on the struct and no spaces between
+	Bar int    `json:"bar"`
 }
 
 type person struct {
@@ -147,6 +155,150 @@ func reassingingPointersExamples() {
 	fmt.Println("*f after Update:", *f) // The value does change here
 }
 
+/*
+DO NOT USE. WRONG PATTERN!
+*/
+func makeFooWrong(f *Foo) error {
+	if f == nil { // This check is needed to avoid panics.
+		return errors.New("Can't assign to a nil pointer.")
+	}
+	f.foo = "Hello"
+	f.bar = 1
+	return nil
+}
+
+func makeFooRight() (Foo, error) {
+	f := Foo{
+		foo: "Hello",
+		bar: 1,
+	}
+
+	return f, nil
+}
+
+func jsonExample() {
+	f := struct {
+		Foo string `json:"foo"` // Capital property name on the struct and no spaces between
+		Bar int    `json:"bar"`
+	}{}
+	fmt.Println("f before json.Unmarshal:", f)
+
+	// With json functions we pass pointers because it did not support generics.
+	// Also to optimize memory allocation and garbage collection in case Unmarshal is called in a loop.
+	err := json.Unmarshal([]byte(`{ "foo": "fooJson", "bar": 2}`), &f)
+
+	if err != nil {
+		fmt.Println("Error while parsing the json:", err)
+	}
+	fmt.Println("f after json.Unmarshal:", f)
+
+	f2 := FooJson{}
+	fmt.Println("f2 before json.Unmarshal:", f2)
+
+	err = json.Unmarshal([]byte(`{ "foo": "fooJson", "bar": 2}`), &f2)
+
+	if err != nil {
+		fmt.Println("Error while parsing the json:", err)
+	}
+	fmt.Println("f after json.Unmarshal:", f2)
+}
+
+func funcWithLargeInput(val struct {
+	arr []int
+}) {
+	val.arr[10] = 1
+}
+
+func funcWithLargeInputPointer(val *struct {
+	arr []int
+}) {
+	val.arr[10] = 2
+}
+
+func withLargeOutput() struct {
+	arr []int
+} {
+	largeArray := make([]int, 20_000)
+	objectWithLargeArray := struct {
+		arr []int
+	}{
+		arr: largeArray,
+	}
+
+	return objectWithLargeArray
+}
+
+func withLargeOutputPointer() *struct {
+	arr []int
+} {
+	largeArray := make([]int, 20_000)
+	objectWithLargeArray := struct {
+		arr []int
+	}{
+		arr: largeArray,
+	}
+
+	return &objectWithLargeArray
+}
+
+func returnNoValueWrong() *int {
+	return nil
+}
+
+func returnNoValueCorrect() (int, bool) {
+	return 0, false
+}
+
+func pointersUseCases() {
+	var f1 *Foo
+	makeFooWrong(f1)
+	f2, _ := makeFooRight()
+	fmt.Println("f1:", f1)
+	fmt.Println("f2:", f2)
+	fmt.Println()
+
+	jsonExample()
+	fmt.Println()
+
+	largeArray := make([]int, 20_000)
+	objectWithLargeArray := struct {
+		arr []int
+	}{
+		arr: largeArray,
+	}
+	beforeTime := time.Now()
+	funcWithLargeInput(objectWithLargeArray)
+	afterTime := time.Now()
+	fmt.Println("Time difference input struct:", afterTime.UnixNano()-beforeTime.UnixNano()) // with 20_000 size array it already consistently returns a difference.
+
+	beforeTime = time.Now()
+	funcWithLargeInputPointer(&objectWithLargeArray)
+	afterTime = time.Now()
+	fmt.Println("Time difference input pointer:", afterTime.UnixNano()-beforeTime.UnixNano()) // This rarely returns anything above 0
+
+	// Returning pointers is different though.
+	beforeTime = time.Now()
+	withLargeOutput()
+	afterTime = time.Now()
+	fmt.Println("Time difference return struct:", afterTime.UnixNano()-beforeTime.UnixNano())
+
+	beforeTime = time.Now()
+	withLargeOutputPointer()
+	afterTime = time.Now()
+	fmt.Println("Time difference return pointer:", afterTime.UnixNano()-beforeTime.UnixNano())
+	fmt.Println()
+
+	x := returnNoValueWrong()
+	if x == nil {
+		fmt.Println("You should not use a nil pointer as an undefined value", x)
+	}
+
+	y, ok := returnNoValueCorrect()
+	if ok == false {
+		fmt.Println("No value has been returned by the function:", y, ok)
+	}
+}
+
 func pointersExamples() {
 	pointerSyntaxExamples()
 	fmt.Println()
@@ -156,6 +308,8 @@ func pointersExamples() {
 
 	reassingingPointersExamples()
 	fmt.Println()
+
+	pointersUseCases()
 }
 
 func main() {
