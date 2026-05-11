@@ -14,4 +14,4 @@ clean:
 	go clean
 
 run: build
-	./chapter5
+	./chapter6
