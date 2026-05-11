@@ -22,6 +22,11 @@ Type for operator functions
 */
 type opFuncType func(int, int) int
 
+type person struct {
+	age  int
+	name string
+}
+
 // Use with very much care. You shouldn't do this unless you really need this capability.
 // Package level state should be immutable to make data flow easier to understand.
 var (
@@ -288,8 +293,103 @@ func cat() {
 	}
 }
 
+func multipleDeferExample() int {
+	a := 10
+	defer func(val int) {
+		fmt.Println("first defer -> a:", val)
+	}(a)
+
+	a = 20
+	defer func(val int) {
+		fmt.Println("second defer -> a:", val)
+	}(a)
+
+	a = 30
+	fmt.Println("exiting a: ", a)
+	return a
+}
+
+func getFile(name string) (*os.File, func(), error) {
+	file, err := os.Open(name)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return file, func() {
+		file.Close()
+	}, err
+}
+
+func simpleGetFileExample() {
+	file, closer, err := getFile(os.Args[1])
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer closer()
+
+	stat, err := file.Stat()
+	fmt.Println("File size:", stat.Size())
+}
+
 func deferExamples() {
 	cat()
+
+	fmt.Println()
+	a := multipleDeferExample()
+	fmt.Println("returned a:", a)
+
+	fmt.Println()
+	simpleGetFileExample()
+}
+
+func modifyFails(i int, s string, p person) {
+	i = i * 2
+	s = "Goodbye"
+	p.name = "Sam"
+	fmt.Println("Inside modify(i, s, p):", i, s, p)
+}
+
+func modMap(m map[int]string) {
+	m[2] = "Hello"
+	m[3] = "Goodbye"
+	delete(m, 1)
+	fmt.Println("Inside modMap:", m)
+}
+
+func modSlice(s []int) {
+	for k, v := range s {
+		s[k] = v * 2
+	}
+	s = append(s, 10)
+	fmt.Println("Inside modSlice:", s)
+}
+
+func callByValueExamples() {
+	p := person{}
+	i := 1
+	s := "Hello"
+
+	fmt.Println("Before modifyFails(i, s, p):", i, s, p)
+	modifyFails(i, s, p)
+	fmt.Println("Outside modify(i, s, p):", i, s, p)
+	fmt.Println()
+
+	m := map[int]string{
+		1: "first",
+		2: "second",
+	}
+	fmt.Println("Before modMap:", m)
+	modMap(m)
+	fmt.Println("Outside modMap:", m)
+	fmt.Println()
+
+	sl := []int{3, 4, 5}
+	fmt.Println("Before modSlice:", sl)
+	modSlice(sl)
+	fmt.Println("Outside modSlice:", sl)
 }
 
 func functionsExamples() {
@@ -344,9 +444,178 @@ func functionsExamples() {
 
 	display.SectionTitle("defer")
 	deferExamples()
+
+	display.SectionTitle("Go is call by value")
+	callByValueExamples()
+}
+
+func exercise51() {
+	add, sub, mul, div, rem := func(a, b int) (int, error) {
+		return a + b, nil
+	}, func(a, b int) (int, error) {
+		return a - b, nil
+	}, func(a, b int) (int, error) {
+		return a * b, nil
+	}, func(a, b int) (int, error) {
+		if b == 0 {
+			return 0, errors.New("Can't divide by 0!")
+		}
+		return a / b, nil
+	}, func(a, b int) (int, error) {
+		return a % b, nil
+	}
+
+	opFunc := map[string]func(int, int) (int, error){
+		"+": add,
+		"-": sub,
+		"*": mul,
+		"/": div,
+		"%": rem,
+	}
+
+	expressions := [][]string{
+		{"2", "+", "3"},
+		{"2", "-", "3"},
+		{"2", "*", "3"},
+		{"2", "/", "3"},
+		{"3", "%", "2"},
+		{"4", "/", "0"},
+		{"two", "+", "three"},
+		{"5"},
+	}
+
+	fmt.Println("Exercise 1")
+	fmt.Println()
+
+	for _, v := range expressions {
+		if len(v) != 3 {
+			fmt.Println("Invalid length of the expressions")
+			continue
+		}
+
+		firstOperand, err := strconv.Atoi(v[0])
+		if err != nil {
+			fmt.Println("Invalid first operand:", v[0])
+			continue
+		}
+
+		operator := v[1]
+		operation := opFunc[operator]
+		if operation == nil {
+			fmt.Println("Invalid Operation: ", operator)
+			continue
+		}
+
+		secondOperand, err := strconv.Atoi(v[2])
+		if err != nil {
+			fmt.Println("Invalid second operand:", v[2])
+		}
+
+		res, err := operation(firstOperand, secondOperand)
+		if err != nil {
+			fmt.Println("The operation failed:", err)
+			continue
+		}
+		fmt.Println(v, "=", res)
+	}
+}
+
+func fileLenSolution(name string) (int, error) {
+	file, err := os.Open(name)
+
+	if err != nil {
+		return 0, err
+	}
+
+	defer func() {
+		file.Close()
+	}()
+
+	bytes := make([]byte, 2048)
+
+	totalLen := 0
+	for {
+		count, err := file.Read(bytes)
+
+		if err != nil {
+			if err != io.EOF {
+				return 0, err
+			}
+			return totalLen, nil
+		}
+
+		totalLen += count
+	}
+}
+
+func fileLen(name string) (int, error) {
+	file, err := os.Open(name)
+
+	if err != nil {
+		return 0, err
+	}
+
+	defer func() {
+		file.Close()
+	}()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(stat.Size()), nil
+}
+
+func exercise52() {
+	fmt.Println("Exercise 2")
+	if len(os.Args) < 2 {
+		fmt.Println("File path not provided")
+		return
+	}
+
+	l, err := fileLen(os.Args[1])
+	if err != nil {
+		fmt.Println("Error while obtaining the length of the file:", err)
+	}
+
+	fmt.Println("Length of the file:", l)
+
+	l, err = fileLenSolution(os.Args[1])
+	if err != nil {
+		fmt.Println("Error while obtaining the length of the file:", err)
+	}
+
+	fmt.Println("Length of the file:", l)
+}
+
+func prefixer(prefix string) func(string) string {
+	return func(s string) string {
+		return prefix + " " + s
+	}
+}
+
+func exercise53() {
+	fmt.Println("Exercise 3")
+	helloPrefix := prefixer("Hello")
+	fmt.Println(helloPrefix("Bob"))
+	fmt.Println(helloPrefix("Sam"))
+}
+
+func exercises() {
+	display.SectionTitle("Exercises")
+	fmt.Println()
+	exercise51()
+
+	fmt.Println()
+	exercise52()
+
+	fmt.Println()
+	exercise53()
 }
 
 func main() {
 	display.SectionTitle("Functions")
 	functionsExamples()
+	exercises()
 }
