@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"go-book-practice/display"
+	"math/rand"
+	"os"
 	"time"
 )
 
@@ -299,6 +301,161 @@ func pointersUseCases() {
 	}
 }
 
+/*
+Map should be used as an input param only if keys are not known before hand.
+*/
+func mapInputParameter(m map[string]int) {
+	for k, v := range m {
+		// Process unknown keys and their values.
+		fmt.Println("k, v:", k, v)
+	}
+}
+
+/*
+Structs should be used to define complex objects instead of generic maps.
+*/
+func structInputParam(data struct {
+	firstKey  string
+	secondKey int
+}) {
+	fmt.Println("firstKey:", data.firstKey)
+	fmt.Println("secondKey:", data.secondKey)
+}
+
+/*
+Slices are passed as structs containing len, cap and a pointer in memory.
+Changing elements in the copied struct pointer changes it in the original slice.
+*/
+func changingElements(sl []int) {
+	for k, v := range sl {
+		sl[k] = v + 1*k
+	}
+
+	fmt.Println("inside changingElements")
+	fmt.Println("sl, len, cap:", sl, len(sl), cap(sl))
+}
+
+/*
+Chaging the length of a slice does not affect the original slice because the
+value of len in the original struct is not being updated.
+*/
+func changingLenDoesNotReflect(sl []int) {
+	sl = append(sl, 5)
+	fmt.Println("Inside changingLenDoesNotReflect")
+	fmt.Println("sl, len, cap:", sl, len(sl), cap(sl))
+}
+
+func appendingToSlice(sl []int) {
+	sl = append(sl, 6)
+	fmt.Println("inside appending:")
+	fmt.Println("sl, len, cap:", sl, len(sl), cap(sl))
+}
+
+/*
+You can modify the content of a slice but not it's length or cap.
+It is useful when using as a buffer for data to be read or written.
+*/
+func randomBytesBuffer(buf []byte) []byte {
+	bufLen := len(buf)
+
+	if bufLen > 0 && bufLen%2 != 0 {
+		fmt.Println("An even length buffer must be provided for UTF-8 encoding to be correct.")
+		return buf
+	}
+
+	for i := 1; i < bufLen; i += 2 {
+		randVal := rand.Intn(95)
+		randVal += 32
+		buf[i] = byte(randVal)
+		buf[i-1] = byte(0)
+	}
+
+	return buf
+}
+
+/*
+To demonstrate the use of slices as buffers we
+*/
+func createFileWithRandomData() {
+	file, err := os.Create("example")
+
+	if err != nil {
+		fmt.Println("Error while creating the file:", err)
+	}
+
+	defer func() {
+		fmt.Println("Created file with random data")
+		file.Close()
+	}()
+
+	buf := make([]byte, 256)
+	newLine := []byte{byte('\n')}
+
+	for range rand.Intn(32) {
+		buf = randomBytesBuffer(buf)
+
+		_, err := file.Write(buf)
+		if err != nil {
+			fmt.Println("Error while writing the buffer to the file.")
+		}
+		file.Write(newLine)
+	}
+}
+
+/*
+The advantage of passing a slice as a param is the fact that it passes a struct (pointer, len, cap)
+When passing an array the whole array is being passed.
+*/
+func slicePointersExamples() {
+	sl := make([]int, 3, 6)
+
+	fmt.Println("before changingElements")
+	fmt.Println("sl, len, cap", sl, len(sl), cap(sl))
+	changingElements(sl)
+	fmt.Println("after changingElements")
+	fmt.Println("sl, len, cap", sl, len(sl), cap(sl))
+	fmt.Println()
+
+	fmt.Println("Before changingLenDoesNotReflect")
+	fmt.Println("sl, len, cap:", sl, len(sl), cap(sl))
+	changingLenDoesNotReflect(sl)
+	fmt.Println("after changingLenDoesNotReflect")
+	fmt.Println("sl, len, cap:", sl, len(sl), cap(sl))
+	// fmt.Println("sl[4]:", sl[3]) // panic: runtime error: index out of range [3] with length 3
+	fmt.Println()
+
+	sl = []int{1, 2, 3}
+	fmt.Println("Before appending")
+	fmt.Println("sl, len, cap:", sl, len(sl), cap(sl))
+	appendingToSlice(sl)
+	fmt.Println("Before appending")
+	fmt.Println("sl, len, cap:", sl, len(sl), cap(sl))
+	fmt.Println()
+
+	createFileWithRandomData()
+}
+
+func pointersToMapsAndSlicesExamples() {
+	m := make(map[string]int)
+	m["A"] = 30
+	m["B"] = 87
+
+	mapInputParameter(m)
+
+	obj := struct {
+		firstKey  string
+		secondKey int
+	}{
+		firstKey:  "Hello",
+		secondKey: 54,
+	}
+
+	structInputParam(obj)
+	fmt.Println()
+
+	slicePointersExamples()
+}
+
 func pointersExamples() {
 	pointerSyntaxExamples()
 	fmt.Println()
@@ -310,6 +467,9 @@ func pointersExamples() {
 	fmt.Println()
 
 	pointersUseCases()
+	fmt.Println()
+
+	pointersToMapsAndSlicesExamples()
 }
 
 func main() {
