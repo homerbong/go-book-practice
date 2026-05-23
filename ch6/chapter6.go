@@ -148,7 +148,7 @@ func update(px *int) {
 	*px = 55
 }
 
-func reassingingPointersExamples() {
+func reassigningPointersExamples() {
 	var x int = 10
 	var y int = x
 	y = 20
@@ -508,7 +508,7 @@ func pointersExamples() {
 	pointerTypeExamples()
 	fmt.Println()
 
-	reassingingPointersExamples()
+	reassigningPointersExamples()
 	fmt.Println()
 
 	pointersUseCases()
@@ -582,18 +582,50 @@ func exercise62() {
 	// 2. The underlying array might have changed since we're appending to a slice that has reached its capacity.
 }
 
+func exercise63() {
+	total := 10_000_000
+
+	// sl := make([]Person, total)
+	sl := []Person{}
+
+	beforeTime := time.Now()
+	for range total {
+		sl = append(sl, MakePerson("John", "Doe", 24))
+	}
+	afterTime := time.Now()
+
+	fmt.Println("10_000_000 elements appended in:", afterTime.UnixNano()-beforeTime.UnixNano())
+
+	// With capacity
+	// GOGC 10 ->   appended in: 957371000, 1.15s user 0.31s system 206% cpu 0.707 total
+	// GOGC 100 ->  appended in: 659791000, 0.85s user 0.26s system 189% cpu 0.585 total
+	// GOGC 500 ->  appended in: 559539000, 0.24s user 0.36s system 100% cpu 0.597 total
+	// GOGC 1000 -> appended in: 473990000, 0.24s user 0.34s system 109% cpu 0.522 total
+	// GOGC off  -> appended in: 432873000,  0.16s user 0.26s system 89% cpu 0.470 total
+
+	// Appending
+	// GOGC 10 ->   appended in: 605295000, 1.10s user 0.16s system 198% cpu 0.630 total
+	// GOGC 100 ->  appended in: 442361000, 0.66s user 0.19s system 176% cpu 0.478 total
+	// GOGC 500 ->  appended in: 427821000, 0.41s user 0.20s system 133% cpu 0.459 total
+	// GOGC 1000 -> appended in: 261844000, 0.32s user 0.12s system 156% cpu 0.281 total
+	// GOGC off  -> appended in: 230591000, 0.09s user 0.14s system 85% cpu 0.273 total
+}
+
 func exercises() {
 	display.SectionTitle("Exercises")
 
-	exercise61()
-	fmt.Println()
+	// exercise61()
+	// fmt.Println()
 
-	exercise62()
+	// exercise62()
+	// fmt.Println()
+
+	exercise63()
 }
 
 func main() {
 	display.SectionTitle("Pointers")
-	pointersExamples()
+	// pointersExamples()
 
 	exercises()
 }
