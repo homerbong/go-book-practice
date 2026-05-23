@@ -538,6 +538,7 @@ func MakePersonPointer(firstName string, lastName string, age int) *Person {
 }
 
 func exercise61() {
+	fmt.Println("Exercise 1")
 	newPerson := MakePerson("Dan", "Peterson", 30)
 	// newPerson escapes to heap because the current Go compiler
 	// moves to the heap any value that is passed in to a function
@@ -554,10 +555,40 @@ func exercise61() {
 	fmt.Println("newPersonPointer:", *newPersonPointer)
 }
 
+func UpdateSlice(sl []string, el string) {
+	if len(sl) > 0 {
+		sl[len(sl)-1] = el
+	}
+	fmt.Println("sl in UpdateSlice:", sl)
+}
+
+func GrowSlice(sl []string, el string) {
+	sl = append(sl, el)
+	fmt.Println("sl inside GrowSlice", sl)
+}
+
+func exercise62() {
+	fmt.Println("Exercise 2")
+	sl := []string{"A", "B", "C"}
+
+	fmt.Println("sl before UpdateSlice:", sl)
+	UpdateSlice(sl, "D")
+	fmt.Println("sl after UpdateSlice", sl) // The slice gets updated and the change is perceived outside.
+
+	fmt.Println("sl before GrowSlice:", sl)
+	GrowSlice(sl, "E")
+	fmt.Println("sl after GrowSlice", sl) // The change is not perceived for two reasons:
+	// 1. Since we changed the length the outside variable does not have access to the new element.
+	// 2. The underlying array might have changed since we're appending to a slice that has reached its capacity.
+}
+
 func exercises() {
 	display.SectionTitle("Exercises")
 
 	exercise61()
+	fmt.Println()
+
+	exercise62()
 }
 
 func main() {
