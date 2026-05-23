@@ -7,6 +7,7 @@ import (
 	"go-book-practice/display"
 	"math/rand"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -24,6 +25,24 @@ type person struct {
 	FirstName  string
 	MiddleName *string
 	LastName   string
+}
+
+type Person struct {
+	firstName string
+	lastName  string
+	age       int
+}
+
+type A struct {
+	b *B
+}
+
+type B struct {
+	c *C
+}
+
+type C struct {
+	field string
 }
 
 func makePointer[T any](t T) *T {
@@ -456,6 +475,32 @@ func pointersToMapsAndSlicesExamples() {
 	slicePointersExamples()
 }
 
+func makeAPointer() *A {
+	a := &A{&B{&C{"Hello"}}}
+
+	runtime.SetFinalizer(a.b.c, func(c *C) { fmt.Println("a.b.c with value", c.field, "is garbage collected") })
+
+	return a
+}
+
+func garbageCollectionExample() {
+	aPointer := makeAPointer()
+
+	runtime.GC()
+
+	time.Sleep(200)
+	fmt.Println("aPointer: ", aPointer)
+
+	aPointer = nil
+	fmt.Println("aPointer: ", aPointer)
+
+	runtime.GC()
+
+	time.Sleep(200)
+
+	fmt.Println("Exiting garbageCollectionExample")
+}
+
 func pointersExamples() {
 	pointerSyntaxExamples()
 	fmt.Println()
@@ -470,9 +515,54 @@ func pointersExamples() {
 	fmt.Println()
 
 	pointersToMapsAndSlicesExamples()
+
+	garbageCollectionExample()
+}
+
+func MakePerson(firstName string, lastName string, age int) Person {
+	// The return value escapes the heap because a struct is a pointer.
+	return Person{
+		firstName: firstName,
+		lastName:  lastName,
+		age:       age,
+	}
+}
+
+func MakePersonPointer(firstName string, lastName string, age int) *Person {
+	// It does escape the heap because it's still returning a pointer.
+	return &Person{
+		firstName: firstName,
+		lastName:  lastName,
+		age:       age,
+	}
+}
+
+func exercise61() {
+	newPerson := MakePerson("Dan", "Peterson", 30)
+	// newPerson escapes to heap because the current Go compiler
+	// moves to the heap any value that is passed in to a function
+	// via a parameter that is of an interface type.
+	fmt.Println("newPerson:", newPerson)
+
+	newPersonPointer := MakePersonPointer("Dan", "Peterson", 30)
+	newPersonPointer.age = 31
+
+	// Does not escape the heap because is the same pointer.
+	fmt.Println("newPersonPointer:", newPersonPointer)
+
+	// It escapes the heap because it's a value being passed
+	fmt.Println("newPersonPointer:", *newPersonPointer)
+}
+
+func exercises() {
+	display.SectionTitle("Exercises")
+
+	exercise61()
 }
 
 func main() {
 	display.SectionTitle("Pointers")
 	pointersExamples()
+
+	exercises()
 }
